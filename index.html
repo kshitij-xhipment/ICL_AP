@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>XAP — ICL AP Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif;font-size:12px;background:#f4f4f4;color:#1a1a1a}
+:root{
+  --nav-bg:#1c2033;
+  --nav-accent:#f97316;
+  --surface:#fff;
+  --surface2:#f8f8f8;
+  --border:#e5e5e5;
+  --border2:#d0d0d0;
+  --text:#1a1a1a;
+  --text2:#555;
+  --text3:#999;
+  --blue:#2563eb;
+  --blue-bg:#eff6ff;
+  --orange:#f97316;
+  --green:#16a34a;
+  --green-bg:#f0fdf4;
+  --amber:#d97706;
+  --amber-bg:#fffbeb;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --purple:#7c3aed;
+  --purple-bg:#f5f3ff;
+  --teal:#0d9488;
+  --teal-bg:#f0fdfa;
+  --freight-bg:#dbeafe;--freight-text:#1e40af;
+  --customs-bg:#dcfce7;--customs-text:#166534;
+  --bso-bg:#fef3c7;--bso-text:#92400e;
+  --misc-bg:#ede9fe;--misc-text:#5b21b6;
+  --wtdiff-bg:#fee2e2;--wtdiff-text:#991b1b;
+  --dup-bg:#fef9c3;--dup-border:#fde047;
+}
+
+/* ── App shell ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── Left nav ── */
+.leftnav{width:44px;background:var(--nav-bg);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;flex-shrink:0}
+.leftnav-logo{width:28px;height:28px;background:var(--orange);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;margin-bottom:8px}
+.nav-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:#9ca3b0;cursor:pointer;font-size:16px}
+.nav-icon:hover,.nav-icon.active{background:rgba(255,255,255,0.1);color:#fff}
+.nav-icon.active{color:var(--orange)}
+
+/* ── Main area ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Top bar ── */
+.topbar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
+.topbar-back{color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center}
+.topbar-id{font-weight:600;font-size:12px;color:var(--text)}
+.topbar-tag{font-size:10px;padding:1px 6px;border-radius:3px;background:#e0e7ff;color:#3730a3;font-weight:600}
+.topbar-amount{font-size:12px;font-weight:600;color:var(--text)}
+.topbar-sep{color:var(--border2);margin:0 2px}
+
+/* Status steps */
+.steps{display:flex;align-items:center;gap:0;margin-left:auto}
+.step-item{display:flex;align-items:center;gap:0}
+.step-label{font-size:11px;padding:4px 10px;color:var(--text3);cursor:pointer;border-radius:4px}
+.step-label.done{color:var(--text2)}
+.step-label.active{color:#fff;background:#2563eb;font-weight:600}
+.step-arrow{color:var(--border2);font-size:10px;margin:0 1px}
+.topbar-actions{display:flex;gap:6px;margin-left:12px}
+.tba{font-size:11px;padding:3px 8px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--surface);color:var(--text2);display:flex;align-items:center;gap:4px}
+.tba:hover{background:var(--surface2)}
+.tba.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+.tba.primary:hover{background:#1d4ed8}
+
+/* ── Body split ── */
+.body-split{flex:1;display:flex;overflow:hidden}
+
+/* ── PDF panel ── */
+.pdf-panel{width:310px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden}
+.pdf-toolbar{height:34px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:8px;background:var(--surface2);flex-shrink:0}
+.pdf-toolbar span{font-size:11px;color:var(--text2)}
+.pdf-pages{flex:1;overflow-y:auto;background:#888;padding:10px;display:flex;flex-direction:column;gap:10px}
+.pdf-page{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,0.25);border-radius:2px;padding:14px;font-size:7.5px;line-height:1.5}
+.pdf-page h3{font-size:8px;font-weight:700;text-align:center;margin-bottom:4px;color:#1a1a1a}
+.pdf-page p{color:#555;margin-bottom:2px}
+.pdf-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:7px;color:#666;margin-bottom:6px;border-top:1px solid #eee;padding-top:4px}
+.pdf-table{width:100%;border-collapse:collapse;font-size:6.5px}
+.pdf-table th{background:#f0f0f0;padding:2px 3px;text-align:left;font-weight:600;color:#333;border:0.5px solid #ccc}
+.pdf-table td{padding:1.5px 3px;border:0.5px solid #eee;color:#444}
+.pdf-table tr:nth-child(even) td{background:#fafafa}
+.pdf-footer td{font-weight:700;background:#f5f5f5;color:#1a1a1a}
+.pdf-company{font-size:7px;font-weight:700;color:#1c2033;line-height:1.4}
+.pdf-company small{font-weight:400;color:#888;font-size:6px}
+
+/* ── Right panel ── */
+.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Tab bar ── */
+.tabbar{height:36px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 14px;gap:0;flex-shrink:0}
+.tab{padding:8px 14px 7px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:var(--text2)}
+.tab.active{color:#2563eb;border-bottom-color:#2563eb}
+
+/* ── Screen ── */
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── Section header ── */
+.sec-hdr{height:38px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.sec-title{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px}
+.sec-count{font-size:10px;padding:1px 7px;border-radius:10px;background:#e0e7ff;color:#3730a3;font-weight:600}
+.sec-spacer{flex:1}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;font-size:11px;font-weight:500;border-radius:4px;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-family:'Inter',sans-serif;line-height:1}
+.btn:hover{background:var(--surface2)}
+.btn i{font-size:13px}
+.btn.blue{background:#2563eb;color:#fff;border-color:#2563eb}
+.btn.blue:hover{background:#1d4ed8}
+.btn.orange{background:#f97316;color:#fff;border-color:#f97316}
+.btn.orange:hover{background:#ea6c0a}
+.btn.green{background:#16a34a;color:#fff;border-color:#16a34a}
+.btn.green:hover{background:#15803d}
+.btn.red-outline{border-color:#dc2626;color:#dc2626}
+.btn.red-outline:hover{background:#fef2f2}
+.new-chip{font-size:9px;padding:1px 4px;border-radius:2px;background:#fff;color:#16a34a;border:1px solid #16a34a;font-weight:700;line-height:1.4}
+
+/* ── Filter bar ── */
+.filter-bar{height:36px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.search-box{position:relative;display:flex;align-items:center}
+.search-box i{position:absolute;left:7px;color:var(--text3);font-size:13px;pointer-events:none}
+.search-box input{padding:4px 8px 4px 26px;border:1px solid var(--border2);border-radius:4px;font-size:11px;background:var(--surface);color:var(--text);width:220px;font-family:'Inter',sans-serif;outline:none}
+.search-box input:focus{border-color:#2563eb;box-shadow:0 0 0 2px #dbeafe}
+.filter-sel{padding:4px 7px;border:1px solid var(--border2);border-radius:4px;font-size:11px;background:var(--surface);color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;outline:none}
+.filter-sel:focus{border-color:#2563eb}
+.filter-info{font-size:11px;color:var(--text3);margin-left:2px}
+
+/* ── Table ── */
+.tbl-wrap{flex:1;overflow:auto}
+.tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.tbl thead{position:sticky;top:0;z-index:5}
+.tbl th{background:#f1f3f9;border-bottom:1px solid var(--border2);border-right:1px solid var(--border);padding:0 8px;height:30px;font-size:10px;font-weight:600;color:var(--text2);text-align:left;white-space:nowrap;user-select:none}
+.tbl th:first-child{border-left:none;width:32px;text-align:center}
+.tbl td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:0 8px;height:32px;font-size:11px;color:var(--text);vertical-align:middle}
+.tbl td:first-child{text-align:center;width:32px}
+.tbl tbody tr:hover td{background:#f5f8ff}
+.tbl tbody tr.dup-row td:first-child{border-left:3px solid #fbbf24}
+.tbl tbody tr.dup-row td{background:#fffdf0}
+.tbl tbody tr.dup-row:hover td{background:#fef9c3}
+
+.th-tip{display:inline-flex;align-items:center;gap:3px;position:relative;cursor:default}
+.th-tip .tipbox{display:none;position:absolute;top:calc(100%+6px);left:0;background:#1c2033;color:#fff;font-size:10px;padding:4px 8px;border-radius:4px;white-space:nowrap;z-index:50;font-weight:400;pointer-events:none;line-height:1.5}
+.th-tip:hover .tipbox{display:block}
+
+/* type badges */
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:0.3px;white-space:nowrap}
+.badge-freight{background:var(--freight-bg);color:var(--freight-text)}
+.badge-customs{background:var(--customs-bg);color:var(--customs-text)}
+.badge-bso{background:var(--bso-bg);color:var(--bso-text)}
+.badge-misc{background:var(--misc-bg);color:var(--misc-text)}
+.badge-wtdiff{background:var(--wtdiff-bg);color:var(--wtdiff-text)}
+.badge-dup{background:#fef9c3;color:#713f12;border:1px solid #fde047}
+
+.mono{font-family:'SF Mono','Fira Code',monospace;font-size:10.5px}
+.qid-link{font-family:'SF Mono','Fira Code',monospace;font-size:10px;color:#2563eb;cursor:pointer;text-decoration:none}
+.qid-link:hover{text-decoration:underline}
+
+/* tbl footer */
+.tbl-foot{height:30px;background:var(--surface2);border-top:1px solid var(--border2);display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0}
+.tbl-foot span{font-size:11px;color:var(--text2)}
+.tbl-foot strong{color:var(--text)}
+
+/* ── Map QIDs section ── */
+.map-qids-bar{padding:8px 12px;border-top:1px solid var(--border);background:var(--surface2);font-size:10px;color:var(--text3);flex-shrink:0}
+
+/* ── VALIDATE SCREEN ── */
+.val-filter{height:36px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.val-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+
+.qid-card{background:var(--surface);border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+.qid-card-hdr{background:#f8faff;border-bottom:1px solid var(--border);padding:6px 12px;display:flex;align-items:center;gap:0;min-height:34px}
+.qid-val{font-family:'SF Mono','Fira Code',monospace;font-size:11px;font-weight:700;color:#1c2033;white-space:nowrap}
+.qid-sep{width:1px;height:14px;background:var(--border2);margin:0 10px;flex-shrink:0}
+.awb-label{font-size:10px;color:var(--text3);margin-right:4px;white-space:nowrap}
+.awb-val{font-family:'SF Mono','Fira Code',monospace;font-size:10.5px;font-weight:600;color:var(--text);white-space:nowrap}
+.copy-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:none;background:none;cursor:pointer;color:var(--text3);border-radius:3px;font-size:12px;padding:0;flex-shrink:0;margin-left:2px}
+.copy-btn:hover{background:var(--border);color:var(--text)}
+.copied{font-size:9px;color:var(--green);font-weight:600;display:none;margin-left:3px}
+.sub-chips{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.sub-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);display:flex;align-items:center;gap:3px;white-space:nowrap}
+.sub-chip b{color:var(--text);font-weight:600}
+.status-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.s-delivered{background:var(--green-bg);color:#15803d}
+.s-transit{background:var(--amber-bg);color:#b45309}
+
+/* charge rows */
+.charge-hdr{display:grid;grid-template-columns:1fr 100px 90px 100px 100px 90px;padding:5px 12px;background:#f1f3f9;border-bottom:1px solid var(--border2);font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.4px}
+.charge-row-item{display:grid;grid-template-columns:1fr 100px 90px 100px 100px 90px;padding:6px 12px;border-bottom:1px solid var(--border);font-size:11px;align-items:center}
+.charge-row-item:last-child{border-bottom:none}
+.charge-row-item:hover{background:var(--surface2)}
+
+.c-name{color:var(--text);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.c-pin{font-size:9px;padding:1px 5px;border-radius:2px;background:#e0e7ff;color:#3730a3;font-weight:600;cursor:pointer}
+.c-vendor{font-size:10px;color:var(--text2)}
+.c-leg{font-size:10px;color:var(--text2)}
+.c-cost{font-size:11px;color:var(--text);font-family:'SF Mono','Fira Code',monospace;text-align:right}
+.c-validated{font-size:10px;color:var(--text3);text-align:center}
+.c-remaining{font-size:11px;color:var(--red);font-family:'SF Mono','Fira Code',monospace;text-align:right;font-weight:600}
+.c-remaining.paid{color:var(--text3);font-weight:400}
+.qid-cost-total{font-size:10px;color:var(--text3);text-align:right;padding:4px 12px;border-top:1px solid var(--border);background:var(--surface2)}
+
+/* toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1c2033;color:#fff;font-size:11px;padding:7px 16px;border-radius:6px;display:none;z-index:999;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Left nav -->
+<div class="leftnav">
+  <div class="leftnav-logo">X</div>
+  <div class="nav-icon active"><i class="ti ti-layout-dashboard"></i></div>
+  <div class="nav-icon"><i class="ti ti-file-invoice"></i></div>
+  <div class="nav-icon"><i class="ti ti-truck-delivery"></i></div>
+  <div class="nav-icon"><i class="ti ti-users"></i></div>
+  <div class="nav-icon"><i class="ti ti-settings"></i></div>
+  <div style="flex:1"></div>
+  <div class="nav-icon"><i class="ti ti-bell"></i></div>
+  <div class="nav-icon"><i class="ti ti-user-circle"></i></div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-back"><i class="ti ti-arrow-left"></i></div>
+    <span class="topbar-id">26-27/29/10749</span>
+    <span class="topbar-tag">ICL</span>
+    <span class="topbar-sep">·</span>
+    <span class="topbar-amount">INR 5,67,021.00</span>
+    <div class="steps">
+      <div class="step-item"><span class="step-label done">Mapped</span><span class="step-arrow"><i class="ti ti-chevron-right"></i></span></div>
+      <div class="step-item"><span class="step-label done">0-7d</span><span class="step-arrow"><i class="ti ti-chevron-right"></i></span></div>
+      <div class="step-item"><span class="step-label active" onclick="switchTab('verify',0)">Verify</span><span class="step-arrow"><i class="ti ti-chevron-right"></i></span></div>
+      <div class="step-item"><span class="step-label" onclick="switchTab('validate',1)" id="step-validate">Validate</span><span class="step-arrow"><i class="ti ti-chevron-right"></i></span></div>
+      <div class="step-item"><span class="step-label">Payment</span></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="tba"><i class="ti ti-rotate-clockwise" style="font-size:12px"></i> Retrigger AP</button>
+      <button class="tba primary"><i class="ti ti-building-bank" style="font-size:12px"></i> Zoho Bill</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body-split">
+
+    <!-- PDF panel -->
+    <div class="pdf-panel">
+      <div class="pdf-toolbar">
+        <i class="ti ti-file-type-pdf" style="font-size:16px;color:#dc2626"></i>
+        <span>Tax Invoice — ICL &nbsp;·&nbsp; 1 / 2</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <i class="ti ti-zoom-in" style="font-size:14px;color:#666;cursor:pointer"></i>
+          <i class="ti ti-zoom-out" style="font-size:14px;color:#666;cursor:pointer"></i>
+        </div>
+      </div>
+      <div class="pdf-pages">
+        <div class="pdf-page">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+            <div class="pdf-company">ICL<br><small>Integrated Couriers & Logistics<br>A Brand of Sri Balaji Max Mail Pvt. Ltd.<br>International & Domestic Cargo</small></div>
+            <div style="text-align:right">
+              <div style="font-size:8px;font-weight:700">TAX INVOICE</div>
+              <div style="font-size:6.5px;color:#666">(ORIGINAL FOR RECIPIENT OF SERVICE)</div>
+              <div style="font-size:6.5px;color:#666;margin-top:2px">Invoice From: 23/05/2026</div>
+              <div style="font-size:6.5px;color:#666">Inv. No: 26-27/29/10749</div>
+              <div style="font-size:6.5px;color:#666">Invoice Date: 02/06/2026</div>
+            </div>
+          </div>
+          <div class="pdf-meta-grid">
+            <div><b>Bill To:</b> FIRST SHIPMENT INC</div>
+            <div><b>CIN:</b> U63909TG2006PTC051101</div>
+            <div>16192 COSTAL HIGGWAY</div>
+            <div><b>GST No.:</b> 29AAKCS3811J1Z2</div>
+            <div>LEWES, DE USA</div>
+            <div><b>State:</b> KA-DL</div>
+          </div>
+          <table class="pdf-table">
+            <thead>
+              <tr><th>Sr.</th><th>AWB No.</th><th>Date</th><th>Dest</th><th>Net</th><th>Wt</th><th>Amount</th><th>PSS</th><th>FSC</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>6003255910</td><td>16/05</td><td>U.S.A.</td><td>FDX</td><td>15.500</td><td>7041.00</td><td>400.00</td><td>3683.30</td><td>11124.30</td></tr>
+              <tr><td>2</td><td>6003271492</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>46.000</td><td>19642.00</td><td>1150.00</td><td>10292.04</td><td>31084.04</td></tr>
+              <tr><td>3</td><td>6003272630</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>11.500</td><td>5120.00</td><td>300.00</td><td>3682.50</td><td>9102.50</td></tr>
+              <tr><td>4</td><td>6003272800</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>49.000</td><td>20923.00</td><td>1225.00</td><td>10963.26</td><td>33111.26</td></tr>
+              <tr><td>5</td><td>6003272891</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>32.000</td><td>13792.00</td><td>800.00</td><td>7243.04</td><td>21835.04</td></tr>
+              <tr><td>6</td><td>6003274852</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>14.500</td><td>6199.00</td><td>375.00</td><td>3250.13</td><td>9824.13</td></tr>
+              <tr><td>7</td><td>6003275887</td><td>21/05</td><td>U.S.A.</td><td>FDX</td><td>62.000</td><td>26474.00</td><td>1550.00</td><td>13971.88</td><td>41995.88</td></tr>
+              <tr><td>8</td><td>6003277310</td><td>23/05</td><td>U.S.A.</td><td>FDX</td><td>35.000</td><td>15085.00</td><td>875.00</td><td>8082.75</td><td>24042.75</td></tr>
+              <tr><td>9</td><td>6003278786</td><td>23/05</td><td>U.S.A.</td><td>FDX</td><td>21.000</td><td>9055.00</td><td>525.00</td><td>4749.38</td><td>14329.38</td></tr>
+              <tr><td>10</td><td>6003280055</td><td>25/05</td><td>U.S.A.</td><td>FDX</td><td>47.000</td><td>20069.00</td><td>1175.00</td><td>10836.19</td><td>32080.19</td></tr>
+              <tr><td>32</td><td>CD6003120897</td><td>30/05</td><td>U.S.A.</td><td>FDX</td><td>30.000</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>
+              <tr class="pdf-footer"><td colspan="6">CUSTOM DUTY</td><td>19207.90</td><td></td><td></td><td>19207.90</td></tr>
+              <tr class="pdf-footer"><td colspan="6">DISBURSEMENT FEE</td><td>920.00</td><td></td><td></td><td>920.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pdf-page" style="opacity:0.6">
+          <div style="text-align:center;color:#aaa;padding:30px 0;font-size:9px">Page 2</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="right">
+      <div class="tabbar">
+        <div class="tab active" id="tab-verify" onclick="switchTab('verify',0)">ICL Line Items</div>
+        <div class="tab" id="tab-validate" onclick="switchTab('validate',1)">Validate</div>
+      </div>
+
+      <!-- ── VERIFY SCREEN ── -->
+      <div class="screen active" id="screen-verify">
+        <div class="sec-hdr">
+          <div class="sec-title">
+            <i class="ti ti-file-invoice" style="font-size:14px;color:#2563eb"></i>
+            ICL Line Items
+            <span class="sec-count" id="item-count">12</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);cursor:pointer;margin-left:4px">
+            <i class="ti ti-x" style="font-size:11px"></i> Clear selection
+          </div>
+          <div style="font-size:10px;color:var(--text3);cursor:pointer">Select visible (12)</div>
+          <div class="sec-spacer"></div>
+          <button class="btn" onclick="showToast('Map QIDs clicked')"><i class="ti ti-arrows-exchange"></i> Map QIDs <i class="ti ti-chevron-down" style="font-size:10px"></i></button>
+          <button class="btn orange" onclick="showToast('Parse AWBs opened')"><i class="ti ti-scan"></i> + Parse AWBs</button>
+          <!-- CHANGED: Export CSV (was no button) -->
+          <button class="btn green" onclick="showToast('Exporting ICL_LineItems_26-27-29-10749_04062026.csv …')">
+            <i class="ti ti-download"></i> Export CSV
+            <span class="new-chip">NEW</span>
+          </button>
+          <button class="btn blue" onclick="showToast('Bulk Accessorial modal opened')"><i class="ti ti-stack-2"></i> Bulk Accessorial</button>
+          <button class="btn red-outline" onclick="showToast('Mark Disputed clicked')"><i class="ti ti-flag"></i> Mark Disputed</button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input id="li-search" placeholder="Search description, AWB, QID…" oninput="filterItems()" aria-label="Search"/>
+          </div>
+          <select class="filter-sel" id="type-filter" onchange="filterItems()" aria-label="Filter by type">
+            <option value="ALL">All</option>
+            <option value="FREIGHT">FREIGHT</option>
+            <option value="CUSTOMS_DUTY">CUSTOMS_DUTY</option>
+            <option value="BSO">BSO</option>
+            <option value="MISC">MISC</option>
+            <option value="WT_DIFF">WT_DIFF</option>
+            <option value="DUP">Duplicates</option>
+          </select>
+          <span class="filter-info" id="filter-info"></span>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="tbl" aria-label="ICL line items">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="cb-all" onchange="toggleAll(this)" aria-label="Select all"></th>
+                <th style="width:130px">AWB</th>
+                <th style="width:150px">Type</th>
+                <th style="width:38px;text-align:center">Qty</th>
+                <th style="width:60px;text-align:right">Weight</th>
+                <!-- CHANGED: Rate and Amount column headers corrected with tooltips -->
+                <th style="width:90px;text-align:right">
+                  <div class="th-tip">Rate &nbsp;<i class="ti ti-info-circle" style="font-size:11px;opacity:0.6"></i>
+                    <div class="tipbox">Per-unit rate from the rate card</div>
+                  </div>
+                </th>
+                <th style="width:100px;text-align:right">
+                  <div class="th-tip">Amount &nbsp;<i class="ti ti-info-circle" style="font-size:11px;opacity:0.6"></i>
+                    <div class="tipbox">Total = Rate × Qty + PSS + FSC (freight)</div>
+                  </div>
+                </th>
+                <th style="width:155px">QID</th>
+                <th style="width:80px">Accessorial</th>
+                <th style="width:28px"></th>
+              </tr>
+            </thead>
+            <tbody id="li-body"></tbody>
+          </table>
+        </div>
+
+        <div class="tbl-foot">
+          <span id="sel-info">0 selected</span>
+          <span style="margin-left:auto"><strong>INR 5,67,021.00</strong> gross &nbsp;·&nbsp; 0-7 days aged</span>
+        </div>
+
+        <div class="map-qids-bar">
+          <strong>Map QIDs</strong> &nbsp;·&nbsp; AWB to QID mapping is handled from the ICL controls above. Mapped QIDs are shown here as vendor references.
+        </div>
+      </div>
+
+      <!-- ── VALIDATE SCREEN ── -->
+      <div class="screen" id="screen-validate">
+        <div class="val-filter">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input placeholder="Search charge…" style="width:160px" aria-label="Search charges"/>
+          </div>
+          <select class="filter-sel" aria-label="All Legs"><option>All Legs</option><option>Origin</option><option>Port to Port</option><option>Delivery</option></select>
+          <select class="filter-sel" aria-label="All Types"><option>All Types</option><option>ICL</option><option>RGL</option><option>Avlokan Exim</option></select>
+          <select class="filter-sel" aria-label="All Vendors"><option>All Vendors</option><option>ICL</option><option>Avlokan Exim</option><option>RGL</option></select>
+          <div style="margin-left:auto;font-size:11px;color:#2563eb;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-file-text"></i> Credit Notes</div>
+        </div>
+
+        <div class="val-body" id="val-body"></div>
+      </div>
+
+    </div><!-- /right -->
+  </div><!-- /body-split -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+const ITEMS = [
+  {awb:'6003255910', desc:'6003255910', type:'FREIGHT', qty:1, wt:15.5, rate:7041, amt:11124.30, qid:'XQAMZAIROS0261692B2', acc:''},
+  {awb:'6003271492', desc:'6003271492', type:'FREIGHT', qty:1, wt:46,   rate:19642,amt:31084.04, qid:'XQAMZAIROS0261697B8', acc:''},
+  {awb:'6003272630', desc:'6003272630', type:'FREIGHT', qty:1, wt:11.5, rate:5120, amt:9102.50,  qid:'XQAMZAIROS0261734A6', acc:''},
+  {awb:'6003272800', desc:'6003272800', type:'FREIGHT', qty:1, wt:49,   rate:20923,amt:33111.26, qid:'XQAMZAIROS0261773A3', acc:''},
+  {awb:'6003272891', desc:'6003272891', type:'FREIGHT', qty:1, wt:32,   rate:13792,amt:21835.04, qid:'XQAMZAIROS0261733B8', acc:''},
+  {awb:'6003274852', desc:'6003274852', type:'FREIGHT', qty:1, wt:14.5, rate:6199, amt:9824.13,  qid:'XQAMZAIROS0261774Q8', acc:''},
+  // CUSTOMS_DUTY with sub-labels — feedback 2
+  {awb:'6003120897', desc:'6003120897 | Custom Duty',       type:'CUSTOMS_DUTY', subLabel:'Custom Duty',      qty:1, wt:30, rate:19207.9, amt:19207.90, qid:'XQAMZAIROS0261629B8', acc:''},
+  {awb:'6003120897', desc:'6003120897 | Disbursement Fee',  type:'CUSTOMS_DUTY', subLabel:'Disbursement Fee', qty:1, wt:30, rate:920,     amt:920.00,   qid:'XQAMZAIROS0261629B8', acc:'', dup:true, dupNote:'AWB 6003120897 · Disbursement Fee already billed in INV-25-91'},
+  // BSO, MISC, WT_DIFF
+  {awb:'6003278786', desc:'6003278786 (cleaned from BSO6003278786)', type:'BSO',    qty:1, wt:21, rate:9055, amt:9055.00,  qid:'XQAMZAIROS0261697B8', acc:'BSO-00412'},
+  {awb:'6003280055', desc:'6003280055 (cleaned from Misc6003280055)',type:'MISC',   qty:1, wt:47, rate:20069,amt:20069.00, qid:'XQAMZAIROS0261777B0', acc:'MISC-00413'},
+  {awb:'6003281222', desc:'6003281222 (cleaned from WTDiff)',         type:'WT_DIFF',qty:1, wt:28, rate:13268,amt:13268.00, qid:'XQAMZAIROS0261734A6', acc:'WTD-00414'},
+  // Duplicate row — freight — feedback dup detection
+  {awb:'6003272800', desc:'6003272800', type:'FREIGHT', qty:1, wt:49, rate:20923,amt:33111.26, qid:'XQAMZAIROS0261773A3', acc:'', dup:true, dupNote:'AWB 6003272800 · FREIGHT already billed in INV-26-14'},
+];
+
+const BADGE = {
+  FREIGHT:     ['badge-freight','FREIGHT'],
+  CUSTOMS_DUTY:['badge-customs','CUSTOMS_DUTY'],
+  BSO:         ['badge-bso','BSO'],
+  MISC:        ['badge-misc','MISC'],
+  WT_DIFF:     ['badge-wtdiff','WT_DIFF'],
+};
+
+function inr(n){return 'INR '+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function inrShort(n){return 'INR '+Math.round(n).toLocaleString('en-IN')}
+
+// ─── RENDER LINE ITEMS ───────────────────────────────────────────────────
+function renderItems(data){
+  const body = document.getElementById('li-body');
+  document.getElementById('item-count').textContent = data.length;
+  if(!data.length){
+    body.innerHTML='<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text3)">No line items match</td></tr>';
+    return;
+  }
+  body.innerHTML = data.map((r,i)=>{
+    const [bcls,blabel] = BADGE[r.type]||['badge-freight','FREIGHT'];
+    return `<tr class="${r.dup?'dup-row':''}">
+      <td><input type="checkbox" class="row-cb" onchange="updateSel()"></td>
+      <td><span class="mono">${r.awb}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="badge ${bcls}">${blabel}</span>
+          ${r.subLabel ? `<span style="font-size:10px;color:var(--text2);white-space:nowrap">${r.subLabel}</span>` : ''}
+        </div>
+      </td>
+      <td style="text-align:center">${r.qty}</td>
+      <td style="text-align:right">${r.wt}</td>
+      <td style="text-align:right" class="mono">${r.rate.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="text-align:right;font-weight:600" class="mono">${r.amt.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td><a class="qid-link" href="#" onclick="return false">${r.qid||'—'}</a></td>
+      <td style="font-size:10px;color:var(--text3)">${r.acc||'—'}</td>
+      <td style="text-align:center"><button class="btn" style="padding:2px 5px;font-size:10px" aria-label="Remove"><i class="ti ti-x"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterItems(){
+  const q = document.getElementById('li-search').value.toLowerCase();
+  const t = document.getElementById('type-filter').value;
+  const out = ITEMS.filter(r=>{
+    const typeOk = t==='ALL'?true : t==='DUP'?r.dup : r.type===t;
+    const hay = (r.desc+r.qid+r.awb+(r.subLabel||'')).toLowerCase();
+    return typeOk && (!q||hay.includes(q));
+  });
+  const info = document.getElementById('filter-info');
+  info.textContent = out.length < ITEMS.length ? `Showing ${out.length} of ${ITEMS.length}` : '';
+  renderItems(out);
+}
+
+function toggleAll(cb){document.querySelectorAll('.row-cb').forEach(c=>c.checked=cb.checked);updateSel()}
+function updateSel(){document.getElementById('sel-info').textContent=document.querySelectorAll('.row-cb:checked').length+' selected'}
+
+// ─── VALIDATE DATA ───────────────────────────────────────────────────────
+const VDATA = [
+  {
+    qid:'XQAMZAIROS0261629B8', awb:'6003120897', status:'delivered',
+    freightAmt:11124, customsAmt:20128,
+    costTotal:'INR 46,303.30',
+    charges:[
+      {name:'All-inclusive door-to-door rate', vendor:'—',           leg:'Port to Port', cost:'INR 30.00',       validated:false, remaining:'INR 30.00'},
+      {name:'AWB Charges',                     vendor:'Avlokan Exim',leg:'Origin',       cost:'INR 100.00',      validated:false, remaining:'INR 100.00'},
+      {name:'Custom Duty',                     vendor:'ICL',         leg:'Origin',       cost:'INR 19,207.90',   validated:false, remaining:'INR 19,207.90'},
+      {name:'Disbursement Fee',                vendor:'ICL',         leg:'Origin',       cost:'INR 920.00',      validated:false, remaining:'INR 920.00'},
+      {name:'Port-to-Door',                    vendor:'ICL',         leg:'Port to Port', cost:'INR 25,466.52',   validated:false, remaining:'INR 25,466.52'},
+      {name:'Terminal Charges',                vendor:'Avlokan Exim',leg:'Origin',       cost:'INR 68.15',       validated:true,  remaining:'—'},
+    ]
+  },
+  {
+    qid:'XQAMZAIROS0261697B8', awb:'6003271492', status:'transit',
+    freightAmt:31084, customsAmt:0,
+    costTotal:'INR 24,636.30',
+    charges:[
+      {name:'Carton Level Handling', vendor:'ICL',         leg:'Origin',       cost:'INR 20.00',     validated:false, remaining:'INR 20.00'},
+      {name:'DDP Charges',           vendor:'ICL',         leg:'Port to Port', cost:'INR 199.58',    validated:false, remaining:'INR 199.58'},
+      {name:'Pickup',                vendor:'ICL',         leg:'Delivery',     cost:'INR 558.83',    validated:false, remaining:'INR 558.83'},
+      {name:'Port-to-Door',          vendor:'ICL',         leg:'Port to Port', cost:'INR 25,466.52', validated:false, remaining:'INR 25,466.52'},
+      {name:'RGL Warehouse',         vendor:'RGL',         leg:'Origin',       cost:'INR 369.62',    validated:false, remaining:'INR 369.62'},
+      {name:'Terminal Chalan',       vendor:'ICL',         leg:'Origin',       cost:'INR 159.66',    validated:true,  remaining:'—'},
+      {name:'Warehouse to Airport',  vendor:'Avlokan Exim',leg:'Origin',       cost:'INR 99.79',     validated:true,  remaining:'—'},
+    ]
+  },
+  {
+    qid:'XQAMZAIROS0261773A3', awb:'6003272800', status:'delivered',
+    freightAmt:33111, customsAmt:0,
+    costTotal:'INR 35,148.06',
+    charges:[
+      {name:'Carton Level Handling', vendor:'ICL',         leg:'Origin',       cost:'INR 10.00',     validated:false, remaining:'INR 10.00'},
+      {name:'DDP Charges',           vendor:'ICL',         leg:'Port to Port', cost:'INR 71.58',     validated:false, remaining:'INR 71.58'},
+      {name:'Port-to-Door',          vendor:'ICL',         leg:'Port to Port', cost:'INR 9,362.46',  validated:false, remaining:'INR 9,362.46'},
+      {name:'RGL Warehouse',         vendor:'RGL',         leg:'Origin',       cost:'INR 132.56',    validated:false, remaining:'INR 132.56'},
+      {name:'Terminal Chalan',       vendor:'ICL',         leg:'Origin',       cost:'INR 57.26',     validated:true,  remaining:'—'},
+      {name:'Warehouse to Airport',  vendor:'Avlokan Exim',leg:'Origin',       cost:'INR 35.79',     validated:true,  remaining:'—'},
+    ]
+  },
+  {
+    qid:'XQAMZAIROS0261734A6', awb:'6003272630', status:'transit',
+    freightAmt:9102, customsAmt:0,
+    costTotal:'INR 26,245.18',
+    charges:[
+      {name:'Carton Level Handling', vendor:'ICL', leg:'Origin',       cost:'INR 20.00',     validated:false, remaining:'INR 20.00'},
+      {name:'DDP Charges',           vendor:'ICL', leg:'Port to Port', cost:'INR 199.58',    validated:false, remaining:'INR 199.58'},
+      {name:'Pickup',                vendor:'ICL', leg:'Delivery',     cost:'INR 783.88',    validated:false, remaining:'INR 783.88'},
+      {name:'Port-to-Door',          vendor:'ICL', leg:'Port to Port', cost:'INR 25,446.52', validated:false, remaining:'INR 25,446.52'},
+    ]
+  },
+];
+
+// ─── RENDER VALIDATE ─────────────────────────────────────────────────────
+function renderValidate(){
+  document.getElementById('val-body').innerHTML = VDATA.map((g,gi)=>{
+    const sCls   = g.status==='delivered'?'s-delivered':'s-transit';
+    const sLabel = g.status==='delivered'?'Delivered':'In transit';
+    const customsChip = g.customsAmt>0
+      ? `<div class="sub-chip">Customs: <b>${inrShort(g.customsAmt)}</b></div>`:'';
+    const chargeRows = g.charges.map(c=>`
+      <div class="charge-row-item">
+        <div class="c-name">
+          ${c.name}
+          <span class="c-pin">PIN</span>
+
+        </div>
+        <div class="c-vendor">${c.vendor}</div>
+        <div class="c-leg">${c.leg}</div>
+        <div class="c-cost">${c.cost}</div>
+        <div class="c-validated">${c.validated?'<i class="ti ti-check" style="color:var(--green)"></i>':'—'}</div>
+        <div class="c-remaining${c.validated?' paid':''}">${c.remaining}</div>
+      </div>`).join('');
+    return `<div class="qid-card">
+      <div class="qid-card-hdr">
+        <span class="qid-val">${g.qid}</span>
+        <button class="copy-btn" onclick="doCopy('${g.qid}',this)" aria-label="Copy QID"><i class="ti ti-copy"></i></button>
+        <span class="copied">Copied</span>
+        <div class="qid-sep"></div>
+        <span class="awb-label">AWB:</span>
+        <span class="awb-val">${g.awb}</span>
+        <button class="copy-btn" onclick="doCopy('${g.awb}',this)" aria-label="Copy AWB"><i class="ti ti-copy"></i></button>
+        <span class="copied">Copied</span>
+        <div class="qid-sep"></div>
+        <div class="sub-chips">
+          <div class="sub-chip">Freight: <b>${inrShort(g.freightAmt)}</b></div>
+          ${customsChip}
+        </div>
+        <div style="flex:1"></div>
+        <span class="status-pill ${sCls}">${sLabel}</span>
+      </div>
+      <div class="charge-hdr">
+        <div>CHARGE NAME</div><div>VENDOR</div><div>LEG</div><div style="text-align:right">COST PRICE</div><div style="text-align:center">VALIDATED</div><div style="text-align:right">REMAINING</div>
+      </div>
+      ${chargeRows}
+      <div class="qid-cost-total">Total cost: <b>${g.costTotal}</b></div>
+    </div>`;
+  }).join('');
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────
+function doCopy(val, btn){
+  navigator.clipboard.writeText(val).catch(()=>{});
+  const msg = btn.nextElementSibling;
+  if(msg){msg.style.display='inline';setTimeout(()=>msg.style.display='none',1500)}
+  showToast('Copied: '+val);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.style.display='none',2200);
+}
+
+function switchTab(id, idx){
+  ['verify','validate'].forEach((s,i)=>{
+    document.getElementById('screen-'+s).classList.toggle('active',i===idx);
+    document.getElementById('tab-'+s).classList.toggle('active',i===idx);
+  });
+  const stepV = document.getElementById('step-validate');
+  if(idx===1){stepV.classList.add('active')}else{stepV.classList.remove('active')}
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+renderItems(ITEMS);
+renderValidate();
+</script>
+</body>
+</html>
